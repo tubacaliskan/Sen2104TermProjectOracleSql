@@ -1,0 +1,216 @@
+DROP TABLE Categories CASCADE CONSTRAINTS;
+DROP TABLE Company CASCADE CONSTRAINTS;
+DROP TABLE Product CASCADE CONSTRAINTS;
+DROP TABLE Customer CASCADE CONSTRAINTS;
+DROP TABLE OrderDetails CASCADE CONSTRAINTS;
+DROP TABLE Orders CASCADE CONSTRAINTS;
+DROP TABLE Cards CASCADE CONSTRAINTS;
+DROP TABLE Billing CASCADE CONSTRAINTS;
+-----------------------------------------------
+
+CREATE TABLE Categories(
+CategoryID NUMBER(6),
+CategoryName VARCHAR2(20) NOT NULL,
+Description VARCHAR2(30),
+PRIMARY KEY(CategoryID));
+
+CREATE TABLE Company(
+CompanyID NUMBER(10), 
+CompanyName VARCHAR2(20) NOT NULL,
+CompanyOwner VARCHAR(20),
+CompanyPhoneNumber NUMBER(11) NOT NULL UNIQUE, 
+CompanyEmail VARCHAR2(30) NOT NULL UNIQUE,
+CompanyAdress VARCHAR(100) NOT NULL,
+CompanyCity VARCHAR(10) NOT NULL,
+CompanyCountry VARCHAR(10) NOT NULL,
+ContractedShippingCompany VARCHAR(20) NOT NULL, 
+PRIMARY KEY(CompanyID));
+
+CREATE TABLE Product(
+ProductID NUMBER(10),
+ProductName VARCHAR2(30) NOT NULL,
+CategoryID NUMBER(6),
+CompanyID NUMBER(10),
+UnitPrice NUMBER(10) NOT NULL, 
+UnitInStock NUMBER(5) NOT NULL,
+PRIMARY KEY(ProductID),
+FOREIGN KEY(CategoryID) REFERENCES Categories(CategoryID),
+FOREIGN KEY(CompanyID) REFERENCES Company(CompanyID)); 
+
+CREATE TABLE Customer( 
+CustomerID NUMBER(7),
+CustomerName VARCHAR(20) NOT NULL,
+CustomerSurname VARCHAR(20) NOT NULL,
+BillingAdress VARCHAR(100) NOT NULL, 
+BillingAdressCity VARCHAR(10) NOT NULL,
+DeliveryAdress VARCHAR(100) NOT NULL,
+DeliveryAdressCity VARCHAR(10) NOT NULL, 
+CustomerPhoneNum NUMBER(11) UNIQUE NOT NULL, 
+CustomerEmail VARCHAR(30) UNIQUE NOT NULL, 
+RegisteredCardsNumber NUMBER(16), 
+PRIMARY KEY(CustomerID));
+
+CREATE TABLE OrderDetails( 
+OrderDetailsID NUMBER(10),
+ProductID NUMBER(10),
+UnitPrice NUMBER(10), 
+Quantitiy NUMBER(2) NOT NULL, 
+DiscountForProduct NUMBER(2), 
+DeliveryDate DATE,
+PRIMARY KEY(OrderDetailsID),
+CHECK(DiscountForProduct <= 99) -- CHECK STATEMENT FOR THE CONTROL DISCOUNT AMOUNT.
+);
+
+
+CREATE TABLE Orders(
+OrderID NUMBER(10),
+OrderDetailsID NUMBER(10),
+CompanyID NUMBER(10),
+CustomerID NUMBER(7),
+OrderDate DATE,
+TotalAmountForProduct NUMBER(20),
+GeneralDiscount NUMBER(2),
+PRIMARY KEY(OrderID),
+FOREIGN KEY(OrderDetailsID) REFERENCES OrderDetails(OrderDetailsID),
+FOREIGN KEY(CompanyID) REFERENCES Company(CompanyID)
+);
+
+CREATE TABLE Cards(
+CardNumber NUMBER(16),
+NameOnCard VARCHAR(40) NOT NULL,
+CVCOfCard CHAR(3) NOT NULL,
+CardExpirationDateMonth DATE NOT NULL, 
+CardExpirationDateYear DATE NOT NULL, 
+CardPaymentSystem VARCHAR(10),  
+PRIMARY KEY(CardNumber));
+
+CREATE TABLE Billing(
+BillingID NUMBER(10),
+OrderID NUMBER(10),
+CardNumber NUMBER(16),
+TotalAmountOfProduct NUMBER(10),  
+TotalAmountForGeneral NUMBER(20), 
+PRIMARY KEY(BillingID, OrderID),
+FOREIGN KEY(OrderID) REFERENCES Orders(OrderID),
+FOREIGN KEY(CardNumber) REFERENCES Cards(CardNumber));
+
+INSERT INTO Categories VALUES (011111, 'Clothes', NULL); 
+INSERT INTO Categories VALUES (021111, 'Technological Tools', NULL);
+INSERT INTO Categories VALUES (031111, 'Furniture', NULL);
+
+INSERT INTO Company VALUES (0100000000, 'trendy', 'Selma Karabıyık', 05325678765, 'info@trendy.com', 'Şişli, Büyükdere caddesi', 'İstanbul', 'Türkiye', 'Anında Kapında');
+INSERT INTO Company VALUES (0200000000, 'Kunduracı Cihan', 'Cihan karaosman', 05345633765, 'info@kunduracıcihan.com', 'Çorlu, Koca Ağa Sk. ', 'Tekirdağ', 'Türkiye', 'Hızlı Express');
+INSERT INTO Company VALUES (0300000000, 'technotech', 'Murat Karaca', 05398765765, 'info@technotech.com', 'Şişli, Halâskârgazi Caddesi', 'İstanbul', 'Türkiye', 'Anında Kapında');
+INSERT INTO Company VALUES (0400000000, 'tubatech', 'Tuba Çalışkan', 05386573213, 'info@tubatech.com','Kocasinan, Mustafa Kemal Paşa Bulvarı', 'Kayseri', 'Türkiye', 'geldik yoktunuz');
+INSERT INTO Company VALUES (0500000000, 'Misko', NULL, 05396543212, 'info@misko.com','Osmangazi, Ankara Yolu Cd', 'Bursa',  'Türkiye', 'Anında Kapında');
+INSERT INTO Company VALUES (0600000000, 'Konforumsun', NULL ,05396243156, 'info@konforumsun.com','İzmit, Salim Dervişoğlu Cad', 'Kocaeli',  'Türkiye', 'Hızlı Express');
+
+INSERT INTO Product VALUES (0111000000, 'Slit Dress', 011111 , 0100000000, 650, 12);
+INSERT INTO Product VALUES (0122000000, 'High Sole Shoes', 011111 ,0200000000, 380, 7);
+INSERT INTO Product VALUES (0133000000, 'Pointed heel stilettos', 011111 ,0200000000, 250, 13);
+INSERT INTO Product VALUES (0222000000, 'Iphone 11 64GB', 021111 ,0300000000, 10500, 15);
+INSERT INTO Product VALUES (0233000000, 'Fridge A++', 021111 ,0400000000, 7129, 3);
+INSERT INTO Product VALUES (0333000000, '10 drawer bookshelf', 031111 ,0500000000, 617, 3);
+
+INSERT INTO Customer VALUES (1000000, 'Zeynep', 'Çalışkan' ,'Kağıthane, Hamidiye Mahallesi', 'İstanbul', 'Kağıthane, Merkez Mahallesi', 'İstanbul', 05732653128, 'zeynep.caliskan@email.com', 4500450045004500);
+INSERT INTO Customer VALUES (2000000, 'Zehra', 'Özcan' ,'Beşiktaş, Barbaros Bulvarı', 'İstanbul', 'Beşiktaş, Barbaros Bulvarı', 'İstanbul', 05556789876, 'zehra.ozcan@email.com', 5500550055005500);
+INSERT INTO Customer VALUES (3000000, 'Kenan', 'Durdu' ,'Konak, Mimar Sinan Mahallesi', 'İzmir', 'Beşiktaş, Çırağan cd.', 'İstanbul', 0555678654, 'kenan.durdu@email.com', NULL);
+INSERT INTO Customer VALUES (4000000, 'Zeynep', 'Özen' ,'Muratpaşa,  Adnan Menderes Bulvarı', 'Antalya', 'Muratpaşa, Dumlupınar Blv.', 'Antalya', 05556798276, 'zeynep.ozen@email.com', 4600460046004600);
+
+INSERT INTO OrderDetails VALUES (111110000, 0222000000 , NULL ,1 , 5, TO_DATE ('24/12/2021', 'dd/mm/yyyy')); 
+--INSERT INTO OrderDetails VALUES (111160000, 0333000000 , NULL ,1 , 13, TO_DATE ('25/12/2021', 'mm/dd/yyyy')); 
+INSERT INTO OrderDetails VALUES (111170000, 0133000000 , NULL ,1 , NULL, TO_DATE ('25/12/2021', 'dd/mm/yyyy')); 
+--INSERT INTO OrderDetails VALUES (111120000, 0111000000 , NULL ,1 , 10, TO_DATE ('21/07/2021', 'mm/dd/yyyy'));
+INSERT INTO OrderDetails VALUES (111130000, 0122000000, NULL ,3 , 50, TO_DATE ('01/11/2021', 'dd/mm/yyyy')); 
+INSERT INTO OrderDetails VALUES (111140000, 0122000000, NULL ,1 , 40, TO_DATE ('01/08/2021', 'dd/mm/yyyy')); 
+--INSERT INTO OrderDetails VALUES (111150000, 0233000000, NULL ,1 , 25, TO_DATE ('31/03/2021', 'mm/dd/yyyy')); 
+
+INSERT INTO Orders VALUES (0000011111, 111110000, 0300000000, 1000000, TO_DATE ('23/12/2021', 'dd/mm/yyyy'), NULL,NULL); 
+INSERT INTO Orders VALUES (0000011112, 111130000, 0200000000, 4000000, TO_DATE ('27/10/2021', 'dd/mm/yyyy'), NULL,NULL); 
+INSERT INTO Orders VALUES (0000011113, 111140000, 0200000000, 1000000, TO_DATE ('28/07/2021', 'dd/mm/yyyy'), NULL,NULL); 
+
+INSERT INTO Cards VALUES (4500450045004500, 'Zeynep Çalışkan', 000 , TO_DATE ('12', 'mm'), TO_DATE ('23', 'yy'), NULL);
+INSERT INTO Cards VALUES (4600460046004600, 'Gülten Özen', 001 , TO_DATE ('10', 'mm'), TO_DATE ('25', 'yy'), NULL);
+INSERT INTO Cards VALUES (5500550055005500, 'Nurhan Özcan', 002 , TO_DATE ('01', 'mm'), TO_DATE ('24', 'yy'), NULL);
+
+INSERT INTO Billing VALUES (0001111111, 0000011111, 4500450045004500 , NULL, NULL);
+INSERT INTO Billing VALUES (0001111222, 0000011112, 4600460046004600 , NULL, NULL);
+INSERT INTO Billing VALUES (0001111333, 0000011113, 5500550055005500 , NULL, NULL);
+
+
+-- UPDATE STATEMENT FOR THE AMOUNT OF GENERAL DISCOUNT APPLIED BY THE E-COMMERCE SITE
+UPDATE Orders SET GeneralDiscount = 10;
+
+-- UPDATE CODE TO CALCULATE THE TOTAL AMOUNT OF PRODUCTS BUYED BY THE CUSTOMER
+UPDATE Billing SET TotalAmountOfProduct = (SELECT COUNT(orderID) FROM Orders WHERE Billing.OrderID = Orders.OrderID);
+
+-- UPDATE CODE ACCOUNTING ONLY THE SELLER'S DISCOUNT ON ONE PRODUCT IN THE ORDER DETAILS TABLE
+UPDATE OrderDetails SET UnitPrice = (SELECT Product.UnitPrice - ((Product.UnitPrice * OrderDetails.DiscountForProduct)/100) FROM Product WHERE Product.ProductID = OrderDetails.ProductID);
+
+-- UPDATE CODE CALCULATING THE PRICE OF ALL THE ITEMS THAT A CUSTOMER HAS BUILT TOTAL
+UPDATE Orders o SET TotalAmountForProduct = (SELECT od.UnitPrice *  od.Quantitiy FROM OrderDetails od WHERE od.OrderDetailsID = o.OrderDetailsID);
+
+-- UPDATE STATEMENT TOTAL AMOUNT CALCULATED WITH THE DISCOUNT IMPLEMENTED BY THE E-COMMERCE SITE
+UPDATE Billing b SET TotalAmountForGeneral = (SELECT o.TotalAmountForProduct -((o.TotalAmountForProduct * o.GeneralDiscount)/100) FROM Orders o WHERE o.OrderID = b.OrderID);
+
+-- UPDATE CODE THAT CALCULATES CARD PAYMENT SYSTEM AUTOMATICALLY
+UPDATE Cards SET CardPaymentSystem = CASE
+                                     WHEN SUBSTR(Cards.CardNumber,'1','1') = 4 THEN 'Visa'
+                                     ELSE 'Master'
+                                     END;
+
+-- QUERIES
+--------------------------------
+-- JOIN WITH CONDITION
+--IT SHOWS WHICH COMPANY HAS MANY PRODUCTS
+SELECT CompanyName, COUNT(ProductID) FROM Product p INNER JOIN Company ON p.CompanyID = Company.CompanyID GROUP BY CompanyName;
+
+-- LIST OF CUSTOMER WHO ORDERED                                      
+SELECT c.CustomerID, CONCAT(c.CustomerName,c.CustomerSurname) AS NameSurname , c.BillingAdressCity FROM Customer c INNER JOIN Orders o  on c.CustomerID = o.CustomerID;
+
+-- LIST OF CUSTOMER WHO DID NOT ORDER
+SELECT c.CustomerID, CONCAT(c.CustomerName,c.CustomerSurname) AS NameSurname , c.BillingAdressCity FROM Customer c FULL JOIN Orders o on c.CustomerID = o.CustomerID WHERE o.CustomerID IS NULL;
+
+-----------------------------
+--NESTED QUERIES
+
+--find phone numbers startswith '539'
+--SELECT CompanyPhoneNumber,CompanyID FROM Company WHERE CompanyPhoneNumber LIKE '539%';
+--find product id of that companies
+SELECT ProductID,CompanyID FROM Product WHERE CompanyID 
+IN(SELECT CompanyID FROM Company WHERE CompanyPhoneNumber LIKE '539%');
+
+--find billingIDs whom cards are 'visa'
+--SELECT CardPaymentSystem,CardNumber FROM Cards;
+SELECT CardNumber,BillingID FROM Billing WHERE CardNumber 
+IN(SELECT CardNumber FROM Cards WHERE  CardPaymentSystem='Visa');                                     
+------------------------------------
+--AGGREGATE SOLUTIONS
+
+--SELECT p.ProductName,c.CompanyName FROM Product p 
+--FULL OUTER JOIN Company c ON p.CompanyID=c.CompanyID; --to check following code
+SELECT CompanyName AS "Company Name", COUNT(ProductID) AS "Number of Products"
+FROM Product p FULL OUTER JOIN Company c ON p.CompanyID=c.CompanyID
+GROUP BY CompanyName;
+
+--SELECT p.ProductID, p.ProductName, p.UnitPrice,c.CategoryName FROM Product p 
+--FULL OUTER JOIN Categories c ON p.CategoryID=c.CategoryID;--to check following code
+SELECT c.CategoryName AS "Category Name",MAX(p.UnitPrice) AS "Price of Product" FROM Product p
+FULL OUTER JOIN Categories c ON p.CategoryID=c.CategoryID
+GROUP BY c.CategoryName;
+
+-----------------------------
+--SET SOLUTIONS
+
+--union all methods
+SELECT UnitPrice FROM Product
+UNION ALL
+SELECT UnitPrice FROM orderdetails
+ORDER BY UnitPrice;
+
+-- SET INTERSECT METHOD: COMPANY NAMES IN İSTANBUL AND CONTRACTED SHIPPING COMPANY IS 'Anında Kapında'
+(SELECT CompanyName FROM Company WHERE CompanyCity = 'İstanbul')
+INTERSECT
+(SELECT CompanyName FROM Company WHERE ContractedShippingCompany = 'Anında Kapında' );
+
+
